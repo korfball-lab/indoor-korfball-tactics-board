@@ -918,7 +918,10 @@
 
         function addFrame() {
             if (isPlaying) return;
-            frames.push(createNewFrame());
+            // Copy current frame state to continue from where we left off
+            const currentFrame = frames[currentFrameIndex];
+            const newFrame = JSON.parse(JSON.stringify(currentFrame));
+            frames.push(newFrame);
             currentFrameIndex = frames.length - 1;
             saveToHistory();
             draw();
