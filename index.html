@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>インドアコーフボール戦略ボード（半面）</title>
+    <title>インドアコーフボール戦略ボード（半面）- 動画機能付き</title>
     <style>
         * {
             box-sizing: border-box;
@@ -97,6 +97,24 @@
             background: #5568d3;
         }
 
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
         .btn-danger {
             background: #ef4444;
             color: white;
@@ -138,6 +156,76 @@
             max-width: 100%;
             max-height: 100%;
             cursor: default;
+        }
+
+        /* Frame Controls */
+        .frame-controls {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .frame-info {
+            font-weight: 600;
+            color: #667eea;
+            padding: 8px 12px;
+            background: #f0f2f5;
+            border-radius: 6px;
+        }
+
+        .frame-list {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .frame-btn {
+            padding: 8px 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .frame-btn:hover {
+            border-color: #667eea;
+        }
+
+        .frame-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Playback Controls */
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 0 10px;
+            border-left: 2px solid #ddd;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .speed-control label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .speed-control input[type="range"] {
+            width: 100px;
         }
 
         /* Color Picker */
@@ -242,6 +330,10 @@
             .toolbar {
                 overflow-x: auto;
             }
+            
+            .frame-controls {
+                overflow-x: auto;
+            }
         }
     </style>
 </head>
@@ -249,7 +341,7 @@
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <h1>⚽ インドアコーフボール戦略ボード（半面）</h1>
+            <h1>⚽ インドアコーフボール戦略ボード（半面）- 動画機能付き</h1>
         </div>
 
         <!-- Toolbar -->
@@ -300,6 +392,35 @@
             <div class="canvas-area">
                 <div class="canvas-wrapper">
                     <canvas id="indoorKorfballBoard"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frame Controls -->
+        <div class="frame-controls">
+            <div class="frame-info">
+                <span>フレーム: <span id="currentFrameDisplay">1</span> / <span id="totalFramesDisplay">1</span></span>
+            </div>
+            
+            <div class="tool-group">
+                <button class="btn btn-success" id="addFrameBtn">➕ フレーム追加</button>
+                <button class="btn btn-warning" id="duplicateFrameBtn">📋 複製</button>
+                <button class="btn btn-danger" id="deleteFrameBtn">🗑️ 削除</button>
+            </div>
+
+            <div class="frame-list" id="frameList"></div>
+
+            <div class="playback-controls">
+                <button class="btn btn-success" id="playBtn">▶️ 再生</button>
+                <button class="btn btn-warning" id="stopBtn" style="display: none;">⏸️ 停止</button>
+                <label>
+                    <input type="checkbox" id="loopCheckbox" checked>
+                    <span style="font-size: 12px;">ループ</span>
+                </label>
+                <div class="speed-control">
+                    <label>速度:</label>
+                    <input type="range" id="playbackSpeed" min="100" max="3000" value="1000" step="100">
+                    <span id="speedValue" style="font-size: 12px; color: #666;">1.0x</span>
                 </div>
             </div>
         </div>
@@ -374,6 +495,12 @@
         let tempDrawing = null;
         let history = [];
         let historyIndex = -1;
+        
+        // Playback state
+        let isPlaying = false;
+        let playbackInterval = null;
+        let playbackSpeed = 1000; // milliseconds per frame
+        let loopPlayback = true;
 
         // Initialize first frame
         function createNewFrame() {
@@ -412,7 +539,7 @@
             const aspectRatio = totalWidth / totalHeight;
 
             const maxWidth = window.innerWidth - 40;
-            const maxHeight = window.innerHeight - 150;
+            const maxHeight = window.innerHeight - 250; // Adjusted for frame controls
 
             if (maxWidth / maxHeight > aspectRatio) {
                 canvas.height = maxHeight;
@@ -505,8 +632,6 @@
             ctx.stroke();
 
             // Penalty area - full stadium/capsule shape
-            // Top semicircle around penalty spot + bottom semicircle around korf (flipped) + side lines
-            
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -543,7 +668,7 @@
             // Dark yellow circle for korf (goal) - larger size
             ctx.beginPath();
             ctx.arc(x, y, 0.45 * scale, 0, 2 * Math.PI);
-            ctx.fillStyle = '#D4A017'; // Dark yellow/golden - same as beach
+            ctx.fillStyle = '#D4A017'; // Dark yellow/golden
             ctx.fill();
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2;
@@ -763,8 +888,127 @@
             return Math.sqrt(dx * dx + dy * dy);
         }
 
+        // Frame management
+        function updateFrameDisplay() {
+            document.getElementById('currentFrameDisplay').textContent = currentFrameIndex + 1;
+            document.getElementById('totalFramesDisplay').textContent = frames.length;
+            updateFrameList();
+        }
+
+        function updateFrameList() {
+            const frameList = document.getElementById('frameList');
+            frameList.innerHTML = '';
+            frames.forEach((frame, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'frame-btn';
+                btn.textContent = `${index + 1}`;
+                if (index === currentFrameIndex) {
+                    btn.classList.add('active');
+                }
+                btn.addEventListener('click', () => {
+                    if (!isPlaying) {
+                        currentFrameIndex = index;
+                        draw();
+                        updateFrameDisplay();
+                    }
+                });
+                frameList.appendChild(btn);
+            });
+        }
+
+        function addFrame() {
+            if (isPlaying) return;
+            frames.push(createNewFrame());
+            currentFrameIndex = frames.length - 1;
+            saveToHistory();
+            draw();
+            updateFrameDisplay();
+        }
+
+        function duplicateFrame() {
+            if (isPlaying) return;
+            const currentFrame = frames[currentFrameIndex];
+            const newFrame = JSON.parse(JSON.stringify(currentFrame));
+            frames.splice(currentFrameIndex + 1, 0, newFrame);
+            currentFrameIndex++;
+            saveToHistory();
+            draw();
+            updateFrameDisplay();
+        }
+
+        function deleteFrame() {
+            if (isPlaying) return;
+            if (frames.length <= 1) {
+                alert('最後のフレームは削除できません。');
+                return;
+            }
+            if (confirm('このフレームを削除しますか？')) {
+                frames.splice(currentFrameIndex, 1);
+                if (currentFrameIndex >= frames.length) {
+                    currentFrameIndex = frames.length - 1;
+                }
+                saveToHistory();
+                draw();
+                updateFrameDisplay();
+            }
+        }
+
+        // Playback controls
+        function startPlayback() {
+            if (isPlaying || frames.length <= 1) return;
+            
+            isPlaying = true;
+            document.getElementById('playBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'flex';
+            
+            // Disable editing tools during playback
+            document.querySelectorAll('[data-tool]').forEach(btn => btn.disabled = true);
+            document.getElementById('addFrameBtn').disabled = true;
+            document.getElementById('duplicateFrameBtn').disabled = true;
+            document.getElementById('deleteFrameBtn').disabled = true;
+            
+            // Start from beginning if at the end
+            if (currentFrameIndex >= frames.length - 1) {
+                currentFrameIndex = 0;
+            }
+            
+            playbackInterval = setInterval(() => {
+                currentFrameIndex++;
+                
+                if (currentFrameIndex >= frames.length) {
+                    if (loopPlayback) {
+                        currentFrameIndex = 0;
+                    } else {
+                        stopPlayback();
+                        return;
+                    }
+                }
+                
+                draw();
+                updateFrameDisplay();
+            }, playbackSpeed);
+        }
+
+        function stopPlayback() {
+            isPlaying = false;
+            document.getElementById('playBtn').style.display = 'flex';
+            document.getElementById('stopBtn').style.display = 'none';
+            
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+            
+            // Re-enable editing tools
+            document.querySelectorAll('[data-tool]').forEach(btn => btn.disabled = false);
+            document.getElementById('addFrameBtn').disabled = false;
+            document.getElementById('duplicateFrameBtn').disabled = false;
+            document.getElementById('deleteFrameBtn').disabled = false;
+        }
+
         // Event handlers
         function handleDoubleClick(evt) {
+            if (isPlaying) return;
             const pos = getMousePos(evt);
             const frame = frames[currentFrameIndex];
 
@@ -783,6 +1027,7 @@
         }
 
         function handleMouseDown(evt) {
+            if (isPlaying) return;
             const pos = getMousePos(evt);
             const frame = frames[currentFrameIndex];
 
@@ -834,6 +1079,7 @@
         }
 
         function handleMouseMove(evt) {
+            if (isPlaying) return;
             const pos = getMousePos(evt);
             const frame = frames[currentFrameIndex];
 
@@ -878,6 +1124,7 @@
         }
 
         function handleMouseUp(evt) {
+            if (isPlaying) return;
             const frame = frames[currentFrameIndex];
 
             if (currentTool === 'select') {
@@ -980,10 +1227,11 @@
         const undoBtn = document.getElementById('undoBtn');
         if (undoBtn) {
             undoBtn.addEventListener('click', () => {
-                if (historyIndex > 0) {
+                if (historyIndex > 0 && !isPlaying) {
                     historyIndex--;
                     frames = JSON.parse(JSON.stringify(history[historyIndex]));
                     draw();
+                    updateFrameDisplay();
                 }
             });
         }
@@ -991,10 +1239,11 @@
         const redoBtn = document.getElementById('redoBtn');
         if (redoBtn) {
             redoBtn.addEventListener('click', () => {
-                if (historyIndex < history.length - 1) {
+                if (historyIndex < history.length - 1 && !isPlaying) {
                     historyIndex++;
                     frames = JSON.parse(JSON.stringify(history[historyIndex]));
                     draw();
+                    updateFrameDisplay();
                 }
             });
         }
@@ -1003,6 +1252,7 @@
         const clearDrawingBtn = document.getElementById('clearDrawingBtn');
         if (clearDrawingBtn) {
             clearDrawingBtn.addEventListener('click', () => {
+                if (isPlaying) return;
                 if (confirm('現在のフレームの描画を全て削除しますか？')) {
                     frames[currentFrameIndex].drawings = [];
                     saveToHistory();
@@ -1014,12 +1264,60 @@
         const resetBtn = document.getElementById('resetBtn');
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
+                if (isPlaying) return;
                 if (confirm('全てをリセットしますか？この操作は取り消せません。')) {
+                    stopPlayback();
                     frames = [createNewFrame()];
                     currentFrameIndex = 0;
                     history = [];
                     historyIndex = -1;
                     draw();
+                    updateFrameDisplay();
+                }
+            });
+        }
+
+        // Frame control buttons
+        document.getElementById('addFrameBtn').addEventListener('click', addFrame);
+        document.getElementById('duplicateFrameBtn').addEventListener('click', duplicateFrame);
+        document.getElementById('deleteFrameBtn').addEventListener('click', deleteFrame);
+
+        // Playback control buttons
+        document.getElementById('playBtn').addEventListener('click', startPlayback);
+        document.getElementById('stopBtn').addEventListener('click', stopPlayback);
+
+        // Loop checkbox
+        document.getElementById('loopCheckbox').addEventListener('change', (e) => {
+            loopPlayback = e.target.checked;
+        });
+
+        // Playback speed control
+        const playbackSpeedSlider = document.getElementById('playbackSpeed');
+        const speedValue = document.getElementById('speedValue');
+        if (playbackSpeedSlider && speedValue) {
+            playbackSpeedSlider.addEventListener('input', (e) => {
+                playbackSpeed = parseInt(e.target.value);
+                const speed = (1000 / playbackSpeed).toFixed(1);
+                speedValue.textContent = `${speed}x`;
+                
+                // Restart playback with new speed if currently playing
+                if (isPlaying) {
+                    clearInterval(playbackInterval);
+                    playbackInterval = setInterval(() => {
+                        currentFrameIndex++;
+                        
+                        if (currentFrameIndex >= frames.length) {
+                            if (loopPlayback) {
+                                currentFrameIndex = 0;
+                            } else {
+                                stopPlayback();
+                                return;
+                            }
+                        }
+                        
+                        draw();
+                        updateFrameDisplay();
+                    }, playbackSpeed);
                 }
             });
         }
@@ -1081,11 +1379,13 @@
                     
                     const data = loadDataEl.value;
                     const loadedFrames = JSON.parse(data);
+                    stopPlayback();
                     frames = loadedFrames;
                     currentFrameIndex = 0;
                     history = [];
                     historyIndex = -1;
                     draw();
+                    updateFrameDisplay();
                     
                     const loadModalEl = document.getElementById('loadModal');
                     if (loadModalEl) loadModalEl.classList.remove('active');
@@ -1102,7 +1402,7 @@
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
                 const link = document.createElement('a');
-                link.download = `indoor-korfball-play-${Date.now()}.png`;
+                link.download = `indoor-korfball-play-frame${currentFrameIndex + 1}-${Date.now()}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
             });
@@ -1146,6 +1446,7 @@
         canvas.style.cursor = 'default'; // Set initial cursor for select tool
         resizeCanvas();
         saveToHistory();
+        updateFrameDisplay();
     </script>
 </body>
 </html>
