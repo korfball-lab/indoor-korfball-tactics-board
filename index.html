@@ -1,488 +1,591 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>インドアコーフボール戦略ボード（半面）- 動画機能付き</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <meta name="format-detection" content="telephone=no">
+    <title>Indoor Korfball Tactics Board</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text: #333;
+            --bg: #f0f2f5;
+            --white: #fff;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top: env(safe-area-inset-top, 0px);
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
-            overflow-x: hidden;
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        html, body { 
+            height: 100%; 
+            overflow: hidden;
+            overscroll-behavior: none;
+            position: fixed;
+            width: 100%;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg); 
+            touch-action: manipulation;
         }
 
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+        .app { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            height: 100dvh;
+            padding-top: var(--safe-top);
         }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: 56px;
         }
-
-        .header h1 {
-            font-size: 24px;
+        .header h1 { 
+            font-size: 15px; 
             font-weight: 600;
         }
-
-        /* Toolbar */
-        .toolbar {
-            background: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .tool-group {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-            padding: 0 10px;
-            border-right: 1px solid #ddd;
-        }
-
-        .tool-group:last-child {
-            border-right: none;
-        }
-
-        .btn {
-            padding: 8px 16px;
+        .menu-btn {
+            min-width: 44px; 
+            min-height: 44px; 
             border: none;
-            border-radius: 6px;
-            background: #f0f2f5;
-            color: #333;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px; 
+            color: var(--white);
+            font-size: 22px; 
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
         }
-
-        .btn:hover {
-            background: #e4e6eb;
-            transform: translateY(-1px);
-        }
-
-        .btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #d97706;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
+        .menu-btn:active { 
+            background: rgba(255,255,255,0.3);
+            transform: scale(0.95);
         }
 
         /* Canvas Area */
-        .canvas-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #e5e7eb;
-            padding: 20px;
-            overflow: auto;
-        }
-
-        .canvas-wrapper {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+        .canvas-container {
+            flex: 1; 
+            display: flex; 
             align-items: center;
-            min-height: 500px;
-        }
-
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-            cursor: default;
-        }
-
-        /* Frame Controls */
-        .frame-controls {
-            background: white;
-            padding: 15px 20px;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .frame-info {
-            font-weight: 600;
-            color: #667eea;
-            padding: 8px 12px;
-            background: #f0f2f5;
-            border-radius: 6px;
-        }
-
-        .frame-list {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            flex: 1;
-        }
-
-        .frame-btn {
-            padding: 8px 12px;
-            border: 2px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-
-        .frame-btn:hover {
-            border-color: #667eea;
-        }
-
-        .frame-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        /* Playback Controls */
-        .playback-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            padding: 0 10px;
-            border-left: 2px solid #ddd;
-        }
-
-        .speed-control {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .speed-control label {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .speed-control input[type="range"] {
-            width: 100px;
-        }
-
-        /* Color Picker */
-        .color-picker {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .color-option {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-
-        .color-option.active {
-            border-color: #333;
-            box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
-        }
-
-        /* Input Groups */
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            margin-bottom: 5px;
-            color: #6b7280;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
+            justify-content: center; 
             padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
+            overflow: hidden; 
+            position: relative;
+            background: var(--bg);
+        }
+        canvas { 
+            max-width: 100%; 
+            max-height: 100%; 
+            border-radius: 12px; 
+            touch-action: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Floating Controls */
+        .float-controls {
+            position: absolute; 
+            top: 12px; 
+            right: 12px;
+            display: flex; 
+            gap: 8px; 
+            z-index: 50;
+        }
+        .float-btn {
+            min-width: 44px; 
+            min-height: 44px; 
+            border: none;
+            background: var(--white); 
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            font-size: 20px; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .float-btn:disabled { opacity: 0.4; }
+        .float-btn:active { transform: scale(0.92); }
+
+        /* Frame Bar */
+        .frame-bar {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--white);
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 50;
+        }
+        .frame-info {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            min-width: 50px;
+            text-align: center;
+        }
+        .frame-btn {
+            min-width: 40px;
+            min-height: 40px;
+            border: none;
+            background: var(--bg);
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .frame-btn:active { transform: scale(0.95); }
+        .frame-btn.success { background: var(--success); color: var(--white); }
+        .frame-btn.danger { background: var(--danger); color: var(--white); }
+        .frame-btn.warning { background: var(--warning); color: var(--white); }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            background: var(--white);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding: 14px 12px;
+            padding-bottom: calc(14px + var(--safe-bottom));
+            flex-shrink: 0;
+        }
+        .tool-row { 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+        }
+        .tool-btn {
+            min-width: 64px;
+            min-height: 58px; 
+            border: none;
+            background: var(--bg); 
+            border-radius: 14px; 
+            cursor: pointer;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center; 
+            gap: 4px; 
+            color: var(--text);
+            transition: all 0.15s;
+        }
+        .tool-btn .icon { font-size: 24px; }
+        .tool-btn .label { font-size: 11px; font-weight: 500; }
+        .tool-btn.active { 
+            background: var(--primary); 
+            color: var(--white);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .tool-btn:active { transform: scale(0.95); }
+
+        .color-row {
+            display: flex; 
+            justify-content: center; 
+            gap: 14px;
+            margin-top: 14px; 
+            padding-top: 14px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+        }
+        .color-btn {
+            min-width: 38px; 
+            min-height: 38px; 
+            border-radius: 50%;
+            border: 3px solid transparent; 
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .color-btn.active { 
+            border-color: var(--text); 
+            transform: scale(1.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .color-btn:active { transform: scale(0.9); }
+
+        /* Overlay & Side Panel */
+        .overlay {
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); 
+            z-index: 150;
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.3s;
+        }
+        .overlay.open { opacity: 1; visibility: visible; }
+
+        .side-panel {
+            position: fixed; 
+            top: 0; 
+            right: -300px;
+            width: 280px; 
+            max-width: 85vw; 
+            height: 100%;
+            background: var(--white); 
+            z-index: 200;
+            transition: right 0.3s ease-out; 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+        }
+        .side-panel.open { right: 0; }
+        
+        .panel-header {
+            padding: 16px; 
+            padding-top: calc(16px + var(--safe-top));
+            background: var(--primary); 
+            color: var(--white);
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+        }
+        .panel-header h2 { font-size: 18px; font-weight: 600; }
+        .close-btn {
+            min-width: 44px; 
+            min-height: 44px; 
+            border: none;
+            background: rgba(255,255,255,0.2); 
+            border-radius: 10px;
+            color: var(--white); 
+            font-size: 20px; 
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-btn:active { background: rgba(255,255,255,0.3); }
+        
+        .panel-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .panel-section { margin-bottom: 24px; }
+        .panel-section h3 { 
+            font-size: 12px; 
+            color: #888; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px; 
+        }
+        .panel-btn {
+            width: 100%; 
+            min-height: 50px;
+            padding: 14px 16px; 
+            border: none;
+            background: var(--bg); 
+            border-radius: 12px;
+            font-size: 15px; 
+            color: var(--text); 
+            cursor: pointer;
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 10px;
+        }
+        .panel-btn:active { background: #e4e6eb; transform: scale(0.98); }
+        .panel-btn.danger { background: #fee2e2; color: var(--danger); }
+        .panel-btn .icon { font-size: 18px; }
+
+        .slider-container { 
+            background: var(--bg); 
+            border-radius: 12px; 
+            padding: 14px; 
+        }
+        .slider-label { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 14px; 
+            margin-bottom: 10px; 
+        }
+        .slider { 
+            width: 100%; 
+            height: 6px; 
+            -webkit-appearance: none; 
+            background: #ddd; 
+            border-radius: 3px; 
+        }
+        .slider::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            width: 26px; 
+            height: 26px; 
+            background: var(--primary); 
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
         }
 
         /* Modal */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); 
+            z-index: 300;
+            display: flex; 
+            align-items: center; 
             justify-content: center;
+            padding: 20px; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.3s;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.open { opacity: 1; visibility: visible; }
         .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
+            background: var(--white); 
+            border-radius: 20px; 
+            padding: 24px;
+            width: 100%; 
+            max-width: 360px; 
+            max-height: 80vh; 
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .modal-header { 
+            font-size: 20px; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+        }
+        .modal-input {
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px solid #e5e7eb;
+            border-radius: 12px; 
+            font-size: 16px; 
+            margin-bottom: 12px;
+        }
+        .modal-input:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+        }
+        textarea.modal-input { 
+            min-height: 120px; 
+            font-family: monospace; 
+            font-size: 13px;
+            resize: none;
+        }
+        .modal-actions { 
+            display: flex; 
+            gap: 12px; 
+            margin-top: 20px; 
+        }
+        .modal-btn { 
+            flex: 1; 
+            min-height: 50px;
+            padding: 14px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+        .modal-btn.primary { background: var(--primary); color: var(--white); }
+        .modal-btn.secondary { background: var(--bg); color: var(--text); }
+        .modal-btn:active { transform: scale(0.98); }
+
+        /* Toast */
+        .toast {
+            position: fixed; 
+            bottom: 140px; 
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text); 
+            color: var(--white);
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            font-size: 15px;
+            font-weight: 500;
+            z-index: 400; 
+            opacity: 0; 
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .toast.show { 
+            transform: translateX(-50%) translateY(0); 
+            opacity: 1; 
         }
 
-        .modal-header {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: flex-end;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 12px;
-            min-height: 200px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .toolbar {
-                overflow-x: auto;
-            }
-            
-            .frame-controls {
-                overflow-x: auto;
-            }
+        /* Tablet & Desktop */
+        @media (min-width: 768px) {
+            .header h1 { font-size: 20px; }
+            .tool-btn { min-width: 80px; min-height: 66px; }
+            .tool-btn .icon { font-size: 28px; }
+            .tool-btn .label { font-size: 12px; }
+            .color-btn { min-width: 44px; min-height: 44px; }
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <div class="header">
-            <h1>⚽ インドアコーフボール戦略ボード（半面）- 動画機能付き</h1>
-        </div>
+    <div class="app">
+        <header class="header">
+            <h1>⚽ Indoor Korfball Board (Half Court)</h1>
+            <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+        </header>
 
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <div class="tool-group">
-                <button class="btn active" data-tool="select" title="選択・移動">
-                    🖱️ 選択
-                </button>
-                <button class="btn" data-tool="freehand" title="フリーハンド描画">
-                    ✏️ 描画
-                </button>
-                <button class="btn" data-tool="eraser" title="消しゴム">
-                    🧹 消去
-                </button>
+        <div class="canvas-container">
+            <canvas id="board"></canvas>
+            <div class="float-controls">
+                <button class="float-btn" id="undoBtn" aria-label="Undo">↩</button>
+                <button class="float-btn" id="redoBtn" aria-label="Redo">↪</button>
             </div>
-
-            <div class="tool-group">
-                <label style="font-size: 12px; color: #666;">線の太さ:</label>
-                <input type="range" id="lineWidth" min="1" max="8" value="3" style="width: 80px;">
-                <span id="lineWidthValue" style="font-size: 12px; color: #666;">3</span>
-            </div>
-
-            <div class="tool-group">
-                <div class="color-picker">
-                    <div class="color-option active" data-color="#000000" style="background: #000000;" title="黒"></div>
-                    <div class="color-option" data-color="#ef4444" style="background: #ef4444;" title="赤"></div>
-                    <div class="color-option" data-color="#3b82f6" style="background: #3b82f6;" title="青"></div>
-                </div>
-            </div>
-
-            <div class="tool-group">
-                <button class="btn" id="undoBtn" title="元に戻す">↩️</button>
-                <button class="btn" id="redoBtn" title="やり直し">↪️</button>
-                <button class="btn" id="clearDrawingBtn" title="描画をクリア">🗑️ 描画</button>
-                <button class="btn btn-danger" id="resetBtn" title="全てリセット">🔄 リセット</button>
-            </div>
-
-            <div class="tool-group">
-                <button class="btn btn-primary" id="saveBtn">💾 保存</button>
-                <button class="btn btn-primary" id="loadBtn">📂 読込</button>
-                <button class="btn btn-primary" id="exportBtn">📸 PNG出力</button>
+            <div class="frame-bar">
+                <button class="frame-btn" id="prevFrame" aria-label="Previous">◀</button>
+                <span class="frame-info"><span id="currentFrame">1</span>/<span id="totalFrames">1</span></span>
+                <button class="frame-btn" id="nextFrame" aria-label="Next">▶</button>
+                <button class="frame-btn success" id="addFrame" aria-label="Add">＋</button>
+                <button class="frame-btn danger" id="delFrame" aria-label="Delete">🗑</button>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Canvas Area -->
-            <div class="canvas-area">
-                <div class="canvas-wrapper">
-                    <canvas id="indoorKorfballBoard"></canvas>
-                </div>
+        <div class="bottom-bar">
+            <div class="tool-row">
+                <button class="tool-btn active" data-tool="select">
+                    <span class="icon">👆</span>
+                    <span class="label">Select</span>
+                </button>
+                <button class="tool-btn" data-tool="freehand">
+                    <span class="icon">✏️</span>
+                    <span class="label">Draw</span>
+                </button>
+                <button class="tool-btn" data-tool="eraser">
+                    <span class="icon">🧹</span>
+                    <span class="label">Erase</span>
+                </button>
             </div>
-        </div>
-
-        <!-- Frame Controls -->
-        <div class="frame-controls">
-            <div class="frame-info">
-                <span>フレーム: <span id="currentFrameDisplay">1</span> / <span id="totalFramesDisplay">1</span></span>
-            </div>
-            
-            <div class="tool-group">
-                <button class="btn btn-success" id="addFrameBtn">➕ フレーム追加</button>
-                <button class="btn btn-warning" id="duplicateFrameBtn">📋 複製</button>
-                <button class="btn btn-danger" id="deleteFrameBtn">🗑️ 削除</button>
-            </div>
-
-            <div class="frame-list" id="frameList"></div>
-
-            <div class="playback-controls">
-                <button class="btn btn-success" id="playBtn">▶️ 再生</button>
-                <button class="btn btn-warning" id="stopBtn" style="display: none;">⏸️ 停止</button>
-                <label>
-                    <input type="checkbox" id="loopCheckbox" checked>
-                    <span style="font-size: 12px;">ループ</span>
-                </label>
-                <div class="speed-control">
-                    <label>速度:</label>
-                    <input type="range" id="playbackSpeed" min="100" max="3000" value="1000" step="100">
-                    <span id="speedValue" style="font-size: 12px; color: #666;">1.0x</span>
-                </div>
+            <div class="color-row">
+                <button class="color-btn active" data-color="#000000" style="background:#000" aria-label="Black"></button>
+                <button class="color-btn" data-color="#ef4444" style="background:#ef4444" aria-label="Red"></button>
+                <button class="color-btn" data-color="#3b82f6" style="background:#3b82f6" aria-label="Blue"></button>
+                <button class="color-btn" data-color="#10b981" style="background:#10b981" aria-label="Green"></button>
+                <button class="color-btn" data-color="#ffffff" style="background:#fff;border:2px solid #ccc" aria-label="White"></button>
             </div>
         </div>
     </div>
 
-    <!-- Save Modal -->
+    <!-- Side Panel -->
+    <div class="overlay" id="overlay"></div>
+    <div class="side-panel" id="sidePanel">
+        <div class="panel-header">
+            <h2>Menu</h2>
+            <button class="close-btn" id="closePanel" aria-label="Close">✕</button>
+        </div>
+        <div class="panel-content">
+            <div class="panel-section">
+                <h3>Line Width</h3>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Width</span>
+                        <span id="lineWidthValue">3px</span>
+                    </div>
+                    <input type="range" class="slider" id="lineWidth" min="1" max="8" value="3">
+                </div>
+            </div>
+            <div class="panel-section">
+                <h3>Playback</h3>
+                <button class="panel-btn" id="playBtn">
+                    <span class="icon">▶️</span> Play Animation
+                </button>
+                <div class="slider-container" style="margin-top:10px">
+                    <div class="slider-label">
+                        <span>Speed</span>
+                        <span id="speedValue">1.0x</span>
+                    </div>
+                    <input type="range" class="slider" id="playbackSpeed" min="100" max="3000" value="1000" step="100">
+                </div>
+            </div>
+            <div class="panel-section">
+                <h3>File</h3>
+                <button class="panel-btn" id="saveBtn">
+                    <span class="icon">💾</span> Save
+                </button>
+                <button class="panel-btn" id="loadBtn">
+                    <span class="icon">📂</span> Load
+                </button>
+                <button class="panel-btn" id="exportBtn">
+                    <span class="icon">📷</span> Export PNG
+                </button>
+            </div>
+            <div class="panel-section">
+                <h3>Actions</h3>
+                <button class="panel-btn" id="clearBtn">
+                    <span class="icon">🗑️</span> Clear Drawings
+                </button>
+                <button class="panel-btn danger" id="resetBtn">
+                    <span class="icon">🔄</span> Reset All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
     <div class="modal" id="saveModal">
         <div class="modal-content">
-            <div class="modal-header">プレイを保存</div>
-            <div class="input-group">
-                <label>プレイ名</label>
-                <input type="text" id="playName" placeholder="例: オフェンス1">
-            </div>
-            <div class="input-group">
-                <label>データ（自動生成）</label>
-                <textarea id="saveData" readonly></textarea>
-            </div>
+            <div class="modal-header">💾 Save Play</div>
+            <input type="text" class="modal-input" id="playName" placeholder="Play name">
+            <textarea class="modal-input" id="saveData" readonly></textarea>
             <div class="modal-actions">
-                <button class="btn" id="closeSaveModal">キャンセル</button>
-                <button class="btn btn-primary" id="copyDataBtn">コピー</button>
+                <button class="modal-btn secondary" id="closeSaveModal">Cancel</button>
+                <button class="modal-btn primary" id="copyBtn">Copy</button>
             </div>
         </div>
     </div>
 
-    <!-- Load Modal -->
     <div class="modal" id="loadModal">
         <div class="modal-content">
-            <div class="modal-header">プレイを読み込み</div>
-            <div class="input-group">
-                <label>データを貼り付け</label>
-                <textarea id="loadData" placeholder="保存したJSONデータを貼り付けてください"></textarea>
-            </div>
+            <div class="modal-header">📂 Load Play</div>
+            <textarea class="modal-input" id="loadData" placeholder="Paste saved data here"></textarea>
             <div class="modal-actions">
-                <button class="btn" id="closeLoadModal">キャンセル</button>
-                <button class="btn btn-primary" id="loadDataBtn">読み込み</button>
+                <button class="modal-btn secondary" id="closeLoadModal">Cancel</button>
+                <button class="modal-btn primary" id="loadDataBtn">Load</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Constants for Indoor Korfball (Half Court)
-        const COURT_WIDTH = 20; // meters
-        const COURT_LENGTH = 20; // meters (square court)
-        const BORDER_WIDTH = 2; // meters
-        const PLAYER_RADIUS = 0.7; // meters - increased for better visibility
-        const KORF_X = 10; // meters - center of court width
-        const KORF_Y = 6.7; // meters - from back of court
-        const FREE_PASS_CENTER_OFFSET = 2.5; // meters - distance from korf to center of free pass circle
-        const FREE_PASS_RADIUS = 2.5; // meters - radius of free pass circle
-        const PENALTY_RADIUS = 2.5; // meters - radius of penalty arc
-        const PENALTY_WIDTH = 7.5; // meters - width at back of court
+    <div class="toast" id="toast"></div>
 
-        // Canvas setup
-        const canvas = document.getElementById('indoorKorfballBoard');
+    <script>
+        // ========== Court Configuration (Half Court 20m x 20m) ==========
+        const COURT_WIDTH = 20;
+        const COURT_LENGTH = 20;
+        const BORDER_WIDTH = 2;
+        const PLAYER_RADIUS = 0.7;
+        const KORF_X = 10;
+        const KORF_Y = 6.7;
+
+        const canvas = document.getElementById('board');
         const ctx = canvas.getContext('2d');
         let scale;
+        let dpr = window.devicePixelRatio || 1;
 
-        // Set initial canvas size to prevent blank screen
-        canvas.width = 800;
-        canvas.height = 800;
-
-        // State
         let currentTool = 'select';
         let currentColor = '#000000';
         let currentLineWidth = 3;
@@ -491,40 +594,34 @@
         let selectedObject = null;
         let isDragging = false;
         let offset = { x: 0, y: 0 };
-        let drawingStart = null;
         let tempDrawing = null;
         let history = [];
         let historyIndex = -1;
-        
-        // Playback state
         let isPlaying = false;
         let playbackInterval = null;
-        let playbackSpeed = 1000; // milliseconds per frame
-        let loopPlayback = true;
+        let playbackSpeed = 1000;
 
-        // Initialize first frame
+        // ========== Create Default Frame ==========
         function createNewFrame() {
             const courtStartX = BORDER_WIDTH;
             const courtStartY = BORDER_WIDTH;
-            const courtWidth = COURT_WIDTH;
-            const courtLength = COURT_LENGTH;
+            const cw = COURT_WIDTH;
+            const cl = COURT_LENGTH;
 
             return {
                 players: [
-                    // Team A (Red) - Upper area: 2 circles (1, 2)
-                    {position: [courtStartX + courtWidth * 0.25, courtStartY + courtLength * 0.35], color: '#ef4444', number: '1', gender: 'boy', team: 'A'},
-                    {position: [courtStartX + courtWidth * 0.5, courtStartY + courtLength * 0.22], color: '#ef4444', number: '2', gender: 'boy', team: 'A'},
-                    // Team A (Red) - Lower area: 2 triangles (3, 4) - left side bottom
-                    {position: [courtStartX + courtWidth * 0.12, courtStartY + courtLength * 0.75], color: '#ef4444', number: '3', gender: 'girl', team: 'A'},
-                    {position: [courtStartX + courtWidth * 0.18, courtStartY + courtLength * 0.90], color: '#ef4444', number: '4', gender: 'girl', team: 'A'},
-                    // Team B (Blue) - Upper/Center: 2 circles (5, 6)
+                    // Team A (Red) - Attack
+                    {position: [courtStartX + cw * 0.25, courtStartY + cl * 0.35], color: '#ef4444', number: '1', gender: 'boy', team: 'A'},
+                    {position: [courtStartX + cw * 0.5, courtStartY + cl * 0.22], color: '#ef4444', number: '2', gender: 'boy', team: 'A'},
+                    {position: [courtStartX + cw * 0.12, courtStartY + cl * 0.75], color: '#ef4444', number: '3', gender: 'girl', team: 'A'},
+                    {position: [courtStartX + cw * 0.18, courtStartY + cl * 0.90], color: '#ef4444', number: '4', gender: 'girl', team: 'A'},
+                    // Team B (Blue) - Defense
                     {position: [courtStartX + KORF_X + 1.2, courtStartY + KORF_Y + 0.5], color: '#3b82f6', number: '5', gender: 'boy', team: 'B'},
-                    {position: [courtStartX + courtWidth * 0.75, courtStartY + courtLength * 0.35], color: '#3b82f6', number: '6', gender: 'boy', team: 'B'},
-                    // Team B (Blue) - Lower area: 2 triangles (7, 8) - center bottom
-                    {position: [courtStartX + courtWidth * 0.42, courtStartY + courtLength * 0.80], color: '#3b82f6', number: '7', gender: 'girl', team: 'B'},
-                    {position: [courtStartX + courtWidth * 0.58, courtStartY + courtLength * 0.80], color: '#3b82f6', number: '8', gender: 'girl', team: 'B'},
+                    {position: [courtStartX + cw * 0.75, courtStartY + cl * 0.35], color: '#3b82f6', number: '6', gender: 'boy', team: 'B'},
+                    {position: [courtStartX + cw * 0.42, courtStartY + cl * 0.80], color: '#3b82f6', number: '7', gender: 'girl', team: 'B'},
+                    {position: [courtStartX + cw * 0.58, courtStartY + cl * 0.80], color: '#3b82f6', number: '8', gender: 'girl', team: 'B'},
                 ],
-                ball: { position: [courtStartX + courtWidth * 0.25 + 1.5, courtStartY + courtLength * 0.35], color: '#FFEB3B', radius: 0.45 },
+                ball: { position: [courtStartX + cw * 0.25 + 1.5, courtStartY + cl * 0.35], color: '#FFEB3B', radius: 0.45 },
                 korf: { position: [courtStartX + KORF_X, courtStartY + KORF_Y] },
                 drawings: []
             };
@@ -532,54 +629,56 @@
 
         frames.push(createNewFrame());
 
-        // Resize canvas
+        // ========== Resize Canvas (High DPI Support) ==========
         function resizeCanvas() {
             const totalWidth = COURT_WIDTH + 2 * BORDER_WIDTH;
             const totalHeight = COURT_LENGTH + 2 * BORDER_WIDTH;
             const aspectRatio = totalWidth / totalHeight;
+            const container = canvas.parentElement;
+            const maxWidth = container.clientWidth - 16;
+            const maxHeight = container.clientHeight - 80;
 
-            const maxWidth = window.innerWidth - 40;
-            const maxHeight = window.innerHeight - 250; // Adjusted for frame controls
-
+            let displayWidth, displayHeight;
             if (maxWidth / maxHeight > aspectRatio) {
-                canvas.height = maxHeight;
-                canvas.width = canvas.height * aspectRatio;
+                displayHeight = maxHeight;
+                displayWidth = displayHeight * aspectRatio;
             } else {
-                canvas.width = maxWidth;
-                canvas.height = canvas.width / aspectRatio;
+                displayWidth = maxWidth;
+                displayHeight = displayWidth / aspectRatio;
             }
 
-            scale = canvas.width / totalWidth;
+            dpr = window.devicePixelRatio || 1;
+            canvas.width = displayWidth * dpr;
+            canvas.height = displayHeight * dpr;
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+            ctx.scale(dpr, dpr);
+
+            scale = displayWidth / totalWidth;
             draw();
         }
 
-        // Drawing functions
+        // ========== Draw Court ==========
         function drawCourt() {
             const courtStartX = BORDER_WIDTH * scale;
             const courtStartY = BORDER_WIDTH * scale;
             const courtWidthPx = COURT_WIDTH * scale;
             const courtLengthPx = COURT_LENGTH * scale;
 
-            // Background gradient for border area
-            const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            // Background
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height / dpr);
             bgGradient.addColorStop(0, '#e8f5e8');
             bgGradient.addColorStop(1, '#d4ead4');
             ctx.fillStyle = bgGradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
-            // Shadow for court
+            // Shadow
             ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
             ctx.shadowBlur = 15;
-            ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 5;
 
-            // Main court - green field effect
-            const greenGradient = ctx.createLinearGradient(
-                courtStartX, 
-                courtStartY, 
-                courtStartX, 
-                courtStartY + courtLengthPx
-            );
+            // Green court
+            const greenGradient = ctx.createLinearGradient(courtStartX, courtStartY, courtStartX, courtStartY + courtLengthPx);
             greenGradient.addColorStop(0, '#7CCD7C');
             greenGradient.addColorStop(0.5, '#6FBF6F');
             greenGradient.addColorStop(1, '#62B162');
@@ -588,87 +687,61 @@
 
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
 
-            // Outer boundary - black line
+            // Court boundary
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 4;
             ctx.strokeRect(courtStartX, courtStartY, courtWidthPx, courtLengthPx);
 
-            // Center line (horizontal) - at bottom of this half-court zone
-            ctx.strokeStyle = '#000000';
+            // Center line (bottom)
             ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(courtStartX, courtStartY + courtLengthPx);
             ctx.lineTo(courtStartX + courtWidthPx, courtStartY + courtLengthPx);
             ctx.stroke();
 
-            // Calculate key positions
+            // Penalty area and free pass circle
             const korfXMeters = BORDER_WIDTH + KORF_X;
             const korfYMeters = BORDER_WIDTH + KORF_Y;
-            
-            // Penalty spot is 2.5m in front of (forward from) the korf
             const penaltySpotX = korfXMeters;
             const penaltySpotY = korfYMeters + 2.5;
-            
             const korfXPx = korfXMeters * scale;
             const korfYPx = korfYMeters * scale;
             const penaltySpotXPx = penaltySpotX * scale;
             const penaltySpotYPx = penaltySpotY * scale;
             const radius = 2.5 * scale;
 
-            // Penalty spot marker line (15cm × 5cm line in front of korf)
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
+            // Penalty spot
             ctx.fillStyle = '#000000';
             ctx.fillRect(penaltySpotXPx - 0.075 * scale, penaltySpotYPx - 0.025 * scale, 0.15 * scale, 0.05 * scale);
 
-            // Free pass area - complete circle around penalty spot
+            // Free pass circle
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.arc(penaltySpotXPx, penaltySpotYPx, radius, 0, 2 * Math.PI);
             ctx.stroke();
 
-            // Penalty area - full stadium/capsule shape
-            ctx.strokeStyle = '#000000';
+            // Penalty area (stadium shape)
             ctx.lineWidth = 2.5;
             ctx.beginPath();
-            
-            // Start from bottom-left
             ctx.moveTo(penaltySpotXPx - radius, korfYPx);
-            
-            // Left vertical line
             ctx.lineTo(penaltySpotXPx - radius, penaltySpotYPx);
-            
-            // Top semicircle (around penalty spot)
             ctx.arc(penaltySpotXPx, penaltySpotYPx, radius, Math.PI, 0, false);
-            
-            // Right vertical line
             ctx.lineTo(penaltySpotXPx + radius, korfYPx);
-            
-            // Bottom semicircle (around korf) - arc pointing upward
             ctx.arc(korfXPx, korfYPx, radius, 0, Math.PI, true);
-            
             ctx.closePath();
             ctx.stroke();
-        }
 
-        function drawKorfAtPosition() {
-            const frame = frames[currentFrameIndex];
-            if (frame.korf) {
-                const x = frame.korf.position[0] * scale;
-                const y = frame.korf.position[1] * scale;
-                drawKorf(x, y);
-            }
+            // Korf
+            drawKorf(korfXPx, korfYPx);
         }
 
         function drawKorf(x, y) {
-            // Dark yellow circle for korf (goal) - larger size
             ctx.beginPath();
             ctx.arc(x, y, 0.45 * scale, 0, 2 * Math.PI);
-            ctx.fillStyle = '#D4A017'; // Dark yellow/golden
+            ctx.fillStyle = '#D4A017';
             ctx.fill();
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2;
@@ -676,42 +749,38 @@
         }
 
         function drawPlayer(player) {
-            const {position, color, number, gender} = player;
-            const x = position[0] * scale;
-            const y = position[1] * scale;
-            const playerSize = PLAYER_RADIUS * scale;
+            const x = player.position[0] * scale;
+            const y = player.position[1] * scale;
+            const size = PLAYER_RADIUS * scale;
 
-            ctx.fillStyle = color;
+            ctx.fillStyle = player.color;
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 2;
 
-            if (gender === 'boy') {
-                // Male players: circle
+            if (player.gender === 'boy') {
                 ctx.beginPath();
-                ctx.arc(x, y, playerSize, 0, 2 * Math.PI);
+                ctx.arc(x, y, size, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.stroke();
             } else {
-                // Female players: square
-                ctx.fillRect(x - playerSize, y - playerSize, playerSize * 2, playerSize * 2);
-                ctx.strokeRect(x - playerSize, y - playerSize, playerSize * 2, playerSize * 2);
+                ctx.fillRect(x - size, y - size, size * 2, size * 2);
+                ctx.strokeRect(x - size, y - size, size * 2, size * 2);
             }
 
             ctx.fillStyle = 'white';
-            ctx.font = `bold ${playerSize * 1.0}px Arial`;
+            ctx.font = `bold ${size * 1.0}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(number, x, y);
+            ctx.fillText(player.number, x, y);
         }
 
         function drawBall() {
             const frame = frames[currentFrameIndex];
             const x = frame.ball.position[0] * scale;
             const y = frame.ball.position[1] * scale;
-            const radius = frame.ball.radius * scale;
-
+            const r = frame.ball.radius * scale;
             ctx.beginPath();
-            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.arc(x, y, r, 0, 2 * Math.PI);
             ctx.fillStyle = frame.ball.color;
             ctx.fill();
             ctx.strokeStyle = 'black';
@@ -719,41 +788,7 @@
             ctx.stroke();
         }
 
-        function drawArrow(from, to, color, lineWidth = 3) {
-            const headLength = 15;
-            const angle = Math.atan2(to.y - from.y, to.x - from.x);
-
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = 'round';
-
-            // Line
-            ctx.beginPath();
-            ctx.moveTo(from.x, from.y);
-            ctx.lineTo(to.x, to.y);
-            ctx.stroke();
-
-            // Arrow head
-            ctx.beginPath();
-            ctx.moveTo(to.x, to.y);
-            ctx.lineTo(to.x - headLength * Math.cos(angle - Math.PI / 6), to.y - headLength * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(to.x - headLength * Math.cos(angle + Math.PI / 6), to.y - headLength * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function drawLine(from, to, color, lineWidth = 3) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(from.x, from.y);
-            ctx.lineTo(to.x, to.y);
-            ctx.stroke();
-        }
-
-        function drawFreehand(points, color, lineWidth = 3) {
+        function drawFreehand(points, color, lineWidth) {
             if (points.length < 2) return;
             ctx.strokeStyle = color;
             ctx.lineWidth = lineWidth;
@@ -761,292 +796,85 @@
             ctx.lineJoin = 'round';
             ctx.beginPath();
             ctx.moveTo(points[0].x, points[0].y);
-            
-            // Smooth the freehand line using quadratic curves
             for (let i = 1; i < points.length - 1; i++) {
                 const xc = (points[i].x + points[i + 1].x) / 2;
                 const yc = (points[i].y + points[i + 1].y) / 2;
                 ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
             }
-            
-            if (points.length > 1) {
-                ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-            }
+            ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
             ctx.stroke();
         }
 
         function drawDrawings() {
-            const frame = frames[currentFrameIndex];
-            frame.drawings.forEach(drawing => {
-                const lineWidth = drawing.lineWidth || 3;
-                switch (drawing.type) {
-                    case 'arrow':
-                        drawArrow(drawing.from, drawing.to, drawing.color, lineWidth);
-                        break;
-                    case 'line':
-                        drawLine(drawing.from, drawing.to, drawing.color, lineWidth);
-                        break;
-                    case 'freehand':
-                        drawFreehand(drawing.points, drawing.color, lineWidth);
-                        break;
-                }
+            frames[currentFrameIndex].drawings.forEach(d => {
+                if (d.type === 'freehand') drawFreehand(d.points, d.color, d.lineWidth || 3);
             });
         }
 
         function draw() {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawCourt();
-            drawKorfAtPosition();
-            
-            const frame = frames[currentFrameIndex];
-            frame.players.forEach(drawPlayer);
+            frames[currentFrameIndex].players.forEach(drawPlayer);
             drawBall();
             drawDrawings();
-
-            // Draw temp drawing
-            if (tempDrawing) {
-                const lineWidth = currentLineWidth;
-                switch (currentTool) {
-                    case 'arrow':
-                        drawArrow(tempDrawing.from, tempDrawing.to, currentColor, lineWidth);
-                        break;
-                    case 'line':
-                        drawLine(tempDrawing.from, tempDrawing.to, currentColor, lineWidth);
-                        break;
-                    case 'freehand':
-                        if (tempDrawing.points && tempDrawing.points.length > 0) {
-                            drawFreehand(tempDrawing.points, currentColor, lineWidth);
-                        }
-                        break;
-                }
-            }
+            if (tempDrawing && tempDrawing.points) drawFreehand(tempDrawing.points, currentColor, currentLineWidth);
+            updateFrameDisplay();
         }
 
-        // Mouse/Touch helpers
-        function getMousePos(evt) {
+        function updateFrameDisplay() {
+            document.getElementById('currentFrame').textContent = currentFrameIndex + 1;
+            document.getElementById('totalFrames').textContent = frames.length;
+        }
+
+        // ========== Touch/Mouse Handling ==========
+        function getPos(evt) {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            return {
-                x: (evt.clientX - rect.left) * scaleX,
-                y: (evt.clientY - rect.top) * scaleY
-            };
+            const scaleX = (canvas.width / dpr) / rect.width;
+            const scaleY = (canvas.height / dpr) / rect.height;
+            let clientX, clientY;
+            if (evt.touches && evt.touches.length > 0) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            } else {
+                clientX = evt.clientX;
+                clientY = evt.clientY;
+            }
+            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
         }
 
-        function isPointInPlayer(pos, player) {
+        function isInPlayer(pos, player) {
             const px = player.position[0] * scale;
             const py = player.position[1] * scale;
-            const touchRadius = PLAYER_RADIUS * scale;
-            
-            if (player.gender === 'boy') {
-                // Circle for male players
-                const dist = Math.sqrt(Math.pow(pos.x - px, 2) + Math.pow(pos.y - py, 2));
-                return dist <= touchRadius * 1.2;
-            } else {
-                // Square for female players
-                return (pos.x >= px - touchRadius * 1.2 && pos.x <= px + touchRadius * 1.2 &&
-                        pos.y >= py - touchRadius * 1.2 && pos.y <= py + touchRadius * 1.2);
-            }
+            const r = PLAYER_RADIUS * scale * 1.4;
+            if (player.gender === 'boy') return Math.sqrt((pos.x - px) ** 2 + (pos.y - py) ** 2) <= r;
+            return pos.x >= px - r && pos.x <= px + r && pos.y >= py - r && pos.y <= py + r;
         }
 
-        function isPointInBall(pos) {
+        function isInBall(pos) {
             const frame = frames[currentFrameIndex];
             const bx = frame.ball.position[0] * scale;
             const by = frame.ball.position[1] * scale;
-            const br = frame.ball.radius * scale;
-            const dist = Math.sqrt(Math.pow(pos.x - bx, 2) + Math.pow(pos.y - by, 2));
-            return dist <= br * 1.5;
+            return Math.sqrt((pos.x - bx) ** 2 + (pos.y - by) ** 2) <= frame.ball.radius * scale * 2;
         }
 
-        // Helper function for line distance calculation
-        function distanceToLine(point, lineStart, lineEnd) {
-            const A = point.x - lineStart.x;
-            const B = point.y - lineStart.y;
-            const C = lineEnd.x - lineStart.x;
-            const D = lineEnd.y - lineStart.y;
-
-            const dot = A * C + B * D;
-            const lenSq = C * C + D * D;
-            let param = -1;
-            if (lenSq !== 0) param = dot / lenSq;
-
-            let xx, yy;
-
-            if (param < 0) {
-                xx = lineStart.x;
-                yy = lineStart.y;
-            } else if (param > 1) {
-                xx = lineEnd.x;
-                yy = lineEnd.y;
-            } else {
-                xx = lineStart.x + param * C;
-                yy = lineStart.y + param * D;
-            }
-
-            const dx = point.x - xx;
-            const dy = point.y - yy;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-
-        // Frame management
-        function updateFrameDisplay() {
-            document.getElementById('currentFrameDisplay').textContent = currentFrameIndex + 1;
-            document.getElementById('totalFramesDisplay').textContent = frames.length;
-            updateFrameList();
-        }
-
-        function updateFrameList() {
-            const frameList = document.getElementById('frameList');
-            frameList.innerHTML = '';
-            frames.forEach((frame, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'frame-btn';
-                btn.textContent = `${index + 1}`;
-                if (index === currentFrameIndex) {
-                    btn.classList.add('active');
-                }
-                btn.addEventListener('click', () => {
-                    if (!isPlaying) {
-                        currentFrameIndex = index;
-                        draw();
-                        updateFrameDisplay();
-                    }
-                });
-                frameList.appendChild(btn);
-            });
-        }
-
-        function addFrame() {
+        function handleStart(evt) {
             if (isPlaying) return;
-            // Copy current frame state to continue from where we left off
-            const currentFrame = frames[currentFrameIndex];
-            const newFrame = JSON.parse(JSON.stringify(currentFrame));
-            frames.push(newFrame);
-            currentFrameIndex = frames.length - 1;
-            saveToHistory();
-            draw();
-            updateFrameDisplay();
-        }
-
-        function duplicateFrame() {
-            if (isPlaying) return;
-            const currentFrame = frames[currentFrameIndex];
-            const newFrame = JSON.parse(JSON.stringify(currentFrame));
-            frames.splice(currentFrameIndex + 1, 0, newFrame);
-            currentFrameIndex++;
-            saveToHistory();
-            draw();
-            updateFrameDisplay();
-        }
-
-        function deleteFrame() {
-            if (isPlaying) return;
-            if (frames.length <= 1) {
-                alert('最後のフレームは削除できません。');
-                return;
-            }
-            if (confirm('このフレームを削除しますか？')) {
-                frames.splice(currentFrameIndex, 1);
-                if (currentFrameIndex >= frames.length) {
-                    currentFrameIndex = frames.length - 1;
-                }
-                saveToHistory();
-                draw();
-                updateFrameDisplay();
-            }
-        }
-
-        // Playback controls
-        function startPlayback() {
-            if (isPlaying || frames.length <= 1) return;
-            
-            isPlaying = true;
-            document.getElementById('playBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'flex';
-            
-            // Disable editing tools during playback
-            document.querySelectorAll('[data-tool]').forEach(btn => btn.disabled = true);
-            document.getElementById('addFrameBtn').disabled = true;
-            document.getElementById('duplicateFrameBtn').disabled = true;
-            document.getElementById('deleteFrameBtn').disabled = true;
-            
-            // Start from beginning if at the end
-            if (currentFrameIndex >= frames.length - 1) {
-                currentFrameIndex = 0;
-            }
-            
-            playbackInterval = setInterval(() => {
-                currentFrameIndex++;
-                
-                if (currentFrameIndex >= frames.length) {
-                    if (loopPlayback) {
-                        currentFrameIndex = 0;
-                    } else {
-                        stopPlayback();
-                        return;
-                    }
-                }
-                
-                draw();
-                updateFrameDisplay();
-            }, playbackSpeed);
-        }
-
-        function stopPlayback() {
-            isPlaying = false;
-            document.getElementById('playBtn').style.display = 'flex';
-            document.getElementById('stopBtn').style.display = 'none';
-            
-            if (playbackInterval) {
-                clearInterval(playbackInterval);
-                playbackInterval = null;
-            }
-            
-            // Re-enable editing tools
-            document.querySelectorAll('[data-tool]').forEach(btn => btn.disabled = false);
-            document.getElementById('addFrameBtn').disabled = false;
-            document.getElementById('duplicateFrameBtn').disabled = false;
-            document.getElementById('deleteFrameBtn').disabled = false;
-        }
-
-        // Event handlers
-        function handleDoubleClick(evt) {
-            if (isPlaying) return;
-            const pos = getMousePos(evt);
-            const frame = frames[currentFrameIndex];
-
-            // Check if clicked on a player
-            for (const player of frame.players) {
-                if (isPointInPlayer(pos, player)) {
-                    const newNumber = prompt('プレイヤー番号を入力してください:', player.number);
-                    if (newNumber !== null && newNumber.trim() !== '') {
-                        player.number = newNumber.trim();
-                        saveToHistory();
-                        draw();
-                    }
-                    return;
-                }
-            }
-        }
-
-        function handleMouseDown(evt) {
-            if (isPlaying) return;
-            const pos = getMousePos(evt);
+            evt.preventDefault();
+            const pos = getPos(evt);
             const frame = frames[currentFrameIndex];
 
             if (currentTool === 'select') {
-                // Check ball first
-                if (isPointInBall(pos)) {
+                if (isInBall(pos)) {
                     selectedObject = frame.ball;
                     isDragging = true;
                     offset.x = pos.x - frame.ball.position[0] * scale;
                     offset.y = pos.y - frame.ball.position[1] * scale;
                     return;
                 }
-
-                // Check players
                 for (const player of frame.players) {
-                    if (isPointInPlayer(pos, player)) {
+                    if (isInPlayer(pos, player)) {
                         selectedObject = player;
                         isDragging = true;
                         offset.x = pos.x - player.position[0] * scale;
@@ -1054,402 +882,290 @@
                         return;
                     }
                 }
-            } else if (currentTool === 'eraser') {
-                // Eraser mode - remove drawings at click position
-                const eraserRadius = 15;
-                frame.drawings = frame.drawings.filter(drawing => {
-                    if (drawing.type === 'freehand') {
-                        // Check if any point is near the eraser
-                        return !drawing.points.some(p => 
-                            Math.sqrt(Math.pow(p.x - pos.x, 2) + Math.pow(p.y - pos.y, 2)) < eraserRadius
-                        );
-                    } else if (drawing.type === 'arrow' || drawing.type === 'line') {
-                        // Check if line passes near the eraser
-                        const dist = distanceToLine(pos, drawing.from, drawing.to);
-                        return dist > eraserRadius;
-                    }
-                    return true;
-                });
-                saveToHistory();
-                draw();
-            } else if (['arrow', 'line'].includes(currentTool)) {
-                drawingStart = pos;
-                tempDrawing = { from: pos, to: pos };
             } else if (currentTool === 'freehand') {
-                drawingStart = pos;
                 tempDrawing = { points: [pos] };
+            } else if (currentTool === 'eraser') {
+                eraseAt(pos);
             }
         }
 
-        function handleMouseMove(evt) {
+        function handleMove(evt) {
             if (isPlaying) return;
-            const pos = getMousePos(evt);
-            const frame = frames[currentFrameIndex];
+            evt.preventDefault();
+            const pos = getPos(evt);
 
             if (currentTool === 'select' && isDragging && selectedObject) {
                 selectedObject.position[0] = (pos.x - offset.x) / scale;
                 selectedObject.position[1] = (pos.y - offset.y) / scale;
                 draw();
-            } else if (currentTool === 'eraser' && evt.buttons === 1) {
-                // Continuous erasing while mouse is down
-                const eraserRadius = 15;
-                const beforeLength = frame.drawings.length;
-                frame.drawings = frame.drawings.filter(drawing => {
-                    if (drawing.type === 'freehand') {
-                        return !drawing.points.some(p => 
-                            Math.sqrt(Math.pow(p.x - pos.x, 2) + Math.pow(p.y - pos.y, 2)) < eraserRadius
-                        );
-                    } else if (drawing.type === 'arrow' || drawing.type === 'line') {
-                        const dist = distanceToLine(pos, drawing.from, drawing.to);
-                        return dist > eraserRadius;
-                    }
-                    return true;
-                });
-                if (beforeLength !== frame.drawings.length) {
+            } else if (currentTool === 'freehand' && tempDrawing) {
+                const last = tempDrawing.points[tempDrawing.points.length - 1];
+                if (Math.sqrt((pos.x - last.x) ** 2 + (pos.y - last.y) ** 2) > 2) {
+                    tempDrawing.points.push(pos);
                     draw();
                 }
-            } else if (tempDrawing) {
-                if (['arrow', 'line'].includes(currentTool)) {
-                    tempDrawing.to = pos;
-                } else if (currentTool === 'freehand') {
-                    // Add point with some distance threshold to avoid too many points
-                    const lastPoint = tempDrawing.points[tempDrawing.points.length - 1];
-                    const dist = Math.sqrt(
-                        Math.pow(pos.x - lastPoint.x, 2) + 
-                        Math.pow(pos.y - lastPoint.y, 2)
-                    );
-                    if (dist > 2) { // Only add if moved more than 2 pixels
-                        tempDrawing.points.push(pos);
-                    }
-                }
-                draw();
+            } else if (currentTool === 'eraser' && (evt.buttons === 1 || evt.touches)) {
+                eraseAt(pos);
             }
         }
 
-        function handleMouseUp(evt) {
+        function handleEnd(evt) {
             if (isPlaying) return;
+            evt.preventDefault();
             const frame = frames[currentFrameIndex];
+            if (currentTool === 'select' && isDragging) saveToHistory();
+            if (currentTool === 'freehand' && tempDrawing && tempDrawing.points.length > 1) {
+                frame.drawings.push({ type: 'freehand', points: tempDrawing.points, color: currentColor, lineWidth: currentLineWidth });
+                saveToHistory();
+            }
+            isDragging = false;
+            selectedObject = null;
+            tempDrawing = null;
+            draw();
+        }
 
-            if (currentTool === 'select') {
-                if (isDragging) {
-                    saveToHistory();
-                }
-                isDragging = false;
-                selectedObject = null;
-            } else if (currentTool === 'eraser') {
-                // Save history after erasing
-                if (evt.type === 'mouseup') {
-                    saveToHistory();
-                }
-            } else if (tempDrawing && drawingStart) {
-                const pos = getMousePos(evt);
-                
-                if (currentTool === 'arrow') {
-                    frame.drawings.push({
-                        type: 'arrow',
-                        from: drawingStart,
-                        to: pos,
-                        color: currentColor,
-                        lineWidth: currentLineWidth
-                    });
-                } else if (currentTool === 'line') {
-                    frame.drawings.push({
-                        type: 'line',
-                        from: drawingStart,
-                        to: pos,
-                        color: currentColor,
-                        lineWidth: currentLineWidth
-                    });
-                } else if (currentTool === 'freehand') {
-                    if (tempDrawing.points.length > 1) {
-                        frame.drawings.push({
-                            type: 'freehand',
-                            points: tempDrawing.points,
-                            color: currentColor,
-                            lineWidth: currentLineWidth
-                        });
+        function eraseAt(pos) {
+            const frame = frames[currentFrameIndex];
+            const r = 20;
+            const before = frame.drawings.length;
+            frame.drawings = frame.drawings.filter(d => !d.points.some(p => Math.sqrt((p.x - pos.x) ** 2 + (p.y - pos.y) ** 2) < r));
+            if (frame.drawings.length !== before) draw();
+        }
+
+        // Double tap to edit number
+        let lastTap = 0;
+        function handleDoubleTap(evt) {
+            if (isPlaying) return;
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                const pos = getPos(evt);
+                for (const player of frames[currentFrameIndex].players) {
+                    if (isInPlayer(pos, player)) {
+                        const newNum = prompt('Enter player number:', player.number);
+                        if (newNum !== null && newNum.trim()) {
+                            player.number = newNum.trim();
+                            saveToHistory();
+                            draw();
+                        }
+                        return;
                     }
                 }
+            }
+            lastTap = now;
+        }
 
-                saveToHistory();
-                tempDrawing = null;
-                drawingStart = null;
+        // ========== History ==========
+        function saveToHistory() {
+            history = history.slice(0, historyIndex + 1);
+            history.push(JSON.parse(JSON.stringify(frames)));
+            historyIndex++;
+            if (history.length > 50) { history.shift(); historyIndex--; }
+            updateHistoryBtns();
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                frames = JSON.parse(JSON.stringify(history[historyIndex]));
                 draw();
+                updateHistoryBtns();
             }
         }
 
-        // Tool selection
-        document.querySelectorAll('[data-tool]').forEach(btn => {
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                frames = JSON.parse(JSON.stringify(history[historyIndex]));
+                draw();
+                updateHistoryBtns();
+            }
+        }
+
+        function updateHistoryBtns() {
+            document.getElementById('undoBtn').disabled = historyIndex <= 0;
+            document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+        }
+
+        // ========== Frame Controls ==========
+        function addFrame() {
+            if (isPlaying) return;
+            const newFrame = JSON.parse(JSON.stringify(frames[currentFrameIndex]));
+            frames.push(newFrame);
+            currentFrameIndex = frames.length - 1;
+            saveToHistory();
+            draw();
+            showToast('Frame added');
+        }
+
+        function deleteFrame() {
+            if (isPlaying || frames.length <= 1) return;
+            if (confirm('Delete this frame?')) {
+                frames.splice(currentFrameIndex, 1);
+                if (currentFrameIndex >= frames.length) currentFrameIndex = frames.length - 1;
+                saveToHistory();
+                draw();
+                showToast('Frame deleted');
+            }
+        }
+
+        function prevFrame() {
+            if (currentFrameIndex > 0) { currentFrameIndex--; draw(); }
+        }
+
+        function nextFrame() {
+            if (currentFrameIndex < frames.length - 1) { currentFrameIndex++; draw(); }
+        }
+
+        // ========== Playback ==========
+        function startPlayback() {
+            if (isPlaying || frames.length <= 1) return;
+            isPlaying = true;
+            togglePanel(false);
+            document.getElementById('playBtn').innerHTML = '<span class="icon">⏸️</span> Stop';
+            if (currentFrameIndex >= frames.length - 1) currentFrameIndex = 0;
+
+            playbackInterval = setInterval(() => {
+                currentFrameIndex++;
+                if (currentFrameIndex >= frames.length) currentFrameIndex = 0;
+                draw();
+            }, playbackSpeed);
+        }
+
+        function stopPlayback() {
+            isPlaying = false;
+            if (playbackInterval) { clearInterval(playbackInterval); playbackInterval = null; }
+            document.getElementById('playBtn').innerHTML = '<span class="icon">▶️</span> Play Animation';
+        }
+
+        // ========== UI Helpers ==========
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function togglePanel(open) {
+            document.getElementById('sidePanel').classList.toggle('open', open);
+            document.getElementById('overlay').classList.toggle('open', open);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        // ========== Event Listeners ==========
+        canvas.addEventListener('touchstart', (e) => { handleDoubleTap(e); handleStart(e); }, { passive: false });
+        canvas.addEventListener('touchmove', handleMove, { passive: false });
+        canvas.addEventListener('touchend', handleEnd, { passive: false });
+        canvas.addEventListener('mousedown', (e) => { handleDoubleTap(e); handleStart(e); });
+        canvas.addEventListener('mousemove', handleMove);
+        canvas.addEventListener('mouseup', handleEnd);
+        canvas.addEventListener('mouseleave', handleEnd);
+        canvas.addEventListener('dblclick', (e) => {
+            if (isPlaying) return;
+            const pos = getPos(e);
+            for (const player of frames[currentFrameIndex].players) {
+                if (isInPlayer(pos, player)) {
+                    const newNum = prompt('Enter player number:', player.number);
+                    if (newNum !== null && newNum.trim()) { player.number = newNum.trim(); saveToHistory(); draw(); }
+                    return;
+                }
+            }
+        });
+
+        // Tool buttons
+        document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentTool = btn.dataset.tool;
-                
-                // Update cursor based on tool
-                if (currentTool === 'select') {
-                    canvas.style.cursor = 'default';
-                } else if (currentTool === 'eraser') {
-                    canvas.style.cursor = 'not-allowed';
-                } else {
-                    canvas.style.cursor = 'crosshair';
-                }
+                canvas.style.cursor = currentTool === 'select' ? 'default' : currentTool === 'eraser' ? 'not-allowed' : 'crosshair';
             });
         });
 
-        // Line width control
-        const lineWidthSlider = document.getElementById('lineWidth');
-        const lineWidthValue = document.getElementById('lineWidthValue');
-        if (lineWidthSlider && lineWidthValue) {
-            lineWidthSlider.addEventListener('input', (e) => {
-                currentLineWidth = parseInt(e.target.value);
-                lineWidthValue.textContent = currentLineWidth;
-            });
-        }
-
-        // Color selection
-        document.querySelectorAll('.color-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
-                currentColor = opt.dataset.color;
+        // Color buttons
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentColor = btn.dataset.color;
             });
         });
 
-        // History management
-        function saveToHistory() {
-            const state = JSON.parse(JSON.stringify(frames));
-            history = history.slice(0, historyIndex + 1);
-            history.push(state);
-            historyIndex++;
-            if (history.length > 50) {
-                history.shift();
-                historyIndex--;
-            }
-        }
+        // Menu & Panel
+        document.getElementById('menuBtn').addEventListener('click', () => togglePanel(true));
+        document.getElementById('closePanel').addEventListener('click', () => togglePanel(false));
+        document.getElementById('overlay').addEventListener('click', () => togglePanel(false));
 
-        const undoBtn = document.getElementById('undoBtn');
-        if (undoBtn) {
-            undoBtn.addEventListener('click', () => {
-                if (historyIndex > 0 && !isPlaying) {
-                    historyIndex--;
-                    frames = JSON.parse(JSON.stringify(history[historyIndex]));
-                    draw();
-                    updateFrameDisplay();
-                }
-            });
-        }
-
-        const redoBtn = document.getElementById('redoBtn');
-        if (redoBtn) {
-            redoBtn.addEventListener('click', () => {
-                if (historyIndex < history.length - 1 && !isPlaying) {
-                    historyIndex++;
-                    frames = JSON.parse(JSON.stringify(history[historyIndex]));
-                    draw();
-                    updateFrameDisplay();
-                }
-            });
-        }
-
-        // Clear and reset
-        const clearDrawingBtn = document.getElementById('clearDrawingBtn');
-        if (clearDrawingBtn) {
-            clearDrawingBtn.addEventListener('click', () => {
-                if (isPlaying) return;
-                if (confirm('現在のフレームの描画を全て削除しますか？')) {
-                    frames[currentFrameIndex].drawings = [];
-                    saveToHistory();
-                    draw();
-                }
-            });
-        }
-
-        const resetBtn = document.getElementById('resetBtn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                if (isPlaying) return;
-                if (confirm('全てをリセットしますか？この操作は取り消せません。')) {
-                    stopPlayback();
-                    frames = [createNewFrame()];
-                    currentFrameIndex = 0;
-                    history = [];
-                    historyIndex = -1;
-                    draw();
-                    updateFrameDisplay();
-                }
-            });
-        }
-
-        // Frame control buttons
-        document.getElementById('addFrameBtn').addEventListener('click', addFrame);
-        document.getElementById('duplicateFrameBtn').addEventListener('click', duplicateFrame);
-        document.getElementById('deleteFrameBtn').addEventListener('click', deleteFrame);
-
-        // Playback control buttons
-        document.getElementById('playBtn').addEventListener('click', startPlayback);
-        document.getElementById('stopBtn').addEventListener('click', stopPlayback);
-
-        // Loop checkbox
-        document.getElementById('loopCheckbox').addEventListener('change', (e) => {
-            loopPlayback = e.target.checked;
+        // Sliders
+        document.getElementById('lineWidth').addEventListener('input', (e) => {
+            currentLineWidth = parseInt(e.target.value);
+            document.getElementById('lineWidthValue').textContent = currentLineWidth + 'px';
+        });
+        document.getElementById('playbackSpeed').addEventListener('input', (e) => {
+            playbackSpeed = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = (1000 / playbackSpeed).toFixed(1) + 'x';
+            if (isPlaying) { stopPlayback(); startPlayback(); }
         });
 
-        // Playback speed control
-        const playbackSpeedSlider = document.getElementById('playbackSpeed');
-        const speedValue = document.getElementById('speedValue');
-        if (playbackSpeedSlider && speedValue) {
-            playbackSpeedSlider.addEventListener('input', (e) => {
-                playbackSpeed = parseInt(e.target.value);
-                const speed = (1000 / playbackSpeed).toFixed(1);
-                speedValue.textContent = `${speed}x`;
-                
-                // Restart playback with new speed if currently playing
-                if (isPlaying) {
-                    clearInterval(playbackInterval);
-                    playbackInterval = setInterval(() => {
-                        currentFrameIndex++;
-                        
-                        if (currentFrameIndex >= frames.length) {
-                            if (loopPlayback) {
-                                currentFrameIndex = 0;
-                            } else {
-                                stopPlayback();
-                                return;
-                            }
-                        }
-                        
-                        draw();
-                        updateFrameDisplay();
-                    }, playbackSpeed);
-                }
-            });
-        }
+        // History & Frame buttons
+        document.getElementById('undoBtn').addEventListener('click', undo);
+        document.getElementById('redoBtn').addEventListener('click', redo);
+        document.getElementById('prevFrame').addEventListener('click', prevFrame);
+        document.getElementById('nextFrame').addEventListener('click', nextFrame);
+        document.getElementById('addFrame').addEventListener('click', addFrame);
+        document.getElementById('delFrame').addEventListener('click', deleteFrame);
+        document.getElementById('playBtn').addEventListener('click', () => { isPlaying ? stopPlayback() : startPlayback(); });
 
-        // Save/Load
-        const saveBtn = document.getElementById('saveBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                const data = JSON.stringify(frames, null, 2);
-                const saveDataEl = document.getElementById('saveData');
-                const saveModalEl = document.getElementById('saveModal');
-                if (saveDataEl) saveDataEl.value = data;
-                if (saveModalEl) saveModalEl.classList.add('active');
-            });
-        }
-
-        const closeSaveModal = document.getElementById('closeSaveModal');
-        if (closeSaveModal) {
-            closeSaveModal.addEventListener('click', () => {
-                const saveModalEl = document.getElementById('saveModal');
-                if (saveModalEl) saveModalEl.classList.remove('active');
-            });
-        }
-
-        const copyDataBtn = document.getElementById('copyDataBtn');
-        if (copyDataBtn) {
-            copyDataBtn.addEventListener('click', () => {
-                const textarea = document.getElementById('saveData');
-                if (textarea) {
-                    textarea.select();
-                    document.execCommand('copy');
-                    alert('クリップボードにコピーしました！');
-                }
-            });
-        }
-
-        const loadBtn = document.getElementById('loadBtn');
-        if (loadBtn) {
-            loadBtn.addEventListener('click', () => {
-                const loadModalEl = document.getElementById('loadModal');
-                if (loadModalEl) loadModalEl.classList.add('active');
-            });
-        }
-
-        const closeLoadModal = document.getElementById('closeLoadModal');
-        if (closeLoadModal) {
-            closeLoadModal.addEventListener('click', () => {
-                const loadModalEl = document.getElementById('loadModal');
-                if (loadModalEl) loadModalEl.classList.remove('active');
-            });
-        }
-
-        const loadDataBtn = document.getElementById('loadDataBtn');
-        if (loadDataBtn) {
-            loadDataBtn.addEventListener('click', () => {
-                try {
-                    const loadDataEl = document.getElementById('loadData');
-                    if (!loadDataEl) return;
-                    
-                    const data = loadDataEl.value;
-                    const loadedFrames = JSON.parse(data);
-                    stopPlayback();
-                    frames = loadedFrames;
-                    currentFrameIndex = 0;
-                    history = [];
-                    historyIndex = -1;
-                    draw();
-                    updateFrameDisplay();
-                    
-                    const loadModalEl = document.getElementById('loadModal');
-                    if (loadModalEl) loadModalEl.classList.remove('active');
-                    loadDataEl.value = '';
-                    alert('プレイを読み込みました！');
-                } catch (e) {
-                    alert('データの読み込みに失敗しました。正しいJSON形式か確認してください。');
-                }
-            });
-        }
-
-        // Export
-        const exportBtn = document.getElementById('exportBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                const link = document.createElement('a');
-                link.download = `indoor-korfball-play-frame${currentFrameIndex + 1}-${Date.now()}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
-
-        // Event listeners
-        canvas.addEventListener('dblclick', handleDoubleClick);
-        canvas.addEventListener('mousedown', handleMouseDown);
-        canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('mouseup', handleMouseUp);
-        canvas.addEventListener('mouseleave', handleMouseUp);
-
-        // Touch events
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            handleMouseDown(mouseEvent);
+        // Actions
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (isPlaying) return;
+            togglePanel(false);
+            if (confirm('Clear all drawings?')) { frames[currentFrameIndex].drawings = []; saveToHistory(); draw(); showToast('Cleared'); }
+        });
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (isPlaying) return;
+            togglePanel(false);
+            if (confirm('Reset everything?')) { stopPlayback(); frames = [createNewFrame()]; currentFrameIndex = 0; history = []; historyIndex = -1; draw(); showToast('Reset'); }
         });
 
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            handleMouseMove(mouseEvent);
+        // Save/Load/Export
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            togglePanel(false);
+            document.getElementById('saveData').value = JSON.stringify(frames, null, 2);
+            openModal('saveModal');
         });
-
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handleMouseUp(e);
+        document.getElementById('closeSaveModal').addEventListener('click', () => closeModal('saveModal'));
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            document.getElementById('saveData').select();
+            document.execCommand('copy');
+            showToast('Copied!');
+            closeModal('saveModal');
+        });
+        document.getElementById('loadBtn').addEventListener('click', () => { togglePanel(false); openModal('loadModal'); });
+        document.getElementById('closeLoadModal').addEventListener('click', () => closeModal('loadModal'));
+        document.getElementById('loadDataBtn').addEventListener('click', () => {
+            try {
+                stopPlayback();
+                frames = JSON.parse(document.getElementById('loadData').value);
+                currentFrameIndex = 0; history = []; historyIndex = -1; draw();
+                closeModal('loadModal'); document.getElementById('loadData').value = '';
+                showToast('Loaded!');
+            } catch (e) { showToast('Invalid data'); }
+        });
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            togglePanel(false);
+            const link = document.createElement('a');
+            link.download = `indoor-korfball-frame${currentFrameIndex + 1}-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            showToast('Exported!');
         });
 
         // Initialize
         window.addEventListener('resize', resizeCanvas);
-        canvas.style.cursor = 'default'; // Set initial cursor for select tool
-        resizeCanvas();
         saveToHistory();
-        updateFrameDisplay();
+        resizeCanvas();
     </script>
 </body>
 </html>
