@@ -76,6 +76,3 @@ MIT License
 - [Japan Korfball Association](https://korfball.jp)
 - [IKF Rules](https://korfball.sport)
 
----
-
-Made with ❤️ for the korfball community
