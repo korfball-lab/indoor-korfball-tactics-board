@@ -71,6 +71,11 @@ Based on official IKF Indoor Korfball rules (half court):
 
 MIT License
 
+## 👤 Author
+
+**Hajime Shinohara**  
+📧 shinohara@korfball.jp
+
 ## 🔗 Links
 
 - [Japan Korfball Association](https://korfball.jp)
