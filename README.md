@@ -2,6 +2,8 @@
 
 A mobile-friendly tactical board for indoor korfball coaches and players, featuring frame-by-frame animation.
 
+[https://korfball-lab.github.io/indoor-korfball-tactics-board/](https://korfball-lab.github.io/indoor-korfball-tactics-board/)
+
 ## 🎯 Features
 
 - **Drag & Drop**: Move players and ball by dragging
